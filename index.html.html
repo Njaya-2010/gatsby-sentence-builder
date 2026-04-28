@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentence Builder – The Great Gatsby</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8cc7a;
+    --dark: #0d0d0d;
+    --cream: #f5f0e8;
+    --green: #2a5c45;
+    --green-light: #3d7a5e;
+    --ash: #7a7a7a;
+    --card-bg: #1a1a1a;
+    --border: #2e2e2e;
+  }
+
+  body {
+    background: var(--dark);
+    color: var(--cream);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1205 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 28px 24px 20px;
+    text-align: center;
+  }
+
+  header .eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 5vw, 36px);
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+  }
+
+  header h1 span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  header p.subtitle {
+    font-size: 13px;
+    color: var(--ash);
+    margin-top: 8px;
+    font-weight: 300;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    background: #111;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 0 0 auto;
+    padding: 14px 20px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ash);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--gold-light); }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* PANELS */
+  .panel { display: none; padding: 24px 20px; max-width: 720px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .card p, .card li {
+    font-size: 15px;
+    color: #ccc;
+    line-height: 1.7;
+  }
+
+  .card ul { padding-left: 20px; }
+  .card li { margin-bottom: 6px; }
+
+  /* QUOTE HIGHLIGHT */
+  .quote-block {
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    background: #141414;
+    border-radius: 0 6px 6px 0;
+    margin: 14px 0;
+  }
+  .quote-block p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--cream);
+  }
+
+  /* LEVEL BADGE */
+  .level-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .level-1 { background: #1a3a2a; color: #5eca8e; }
+  .level-2 { background: #2a2a00; color: #d4b840; }
+  .level-3 { background: #2a0a0a; color: #e07070; }
+
+  /* SENTENCE BUILDER */
+  .prompt-box {
+    background: linear-gradient(135deg, #111 0%, #0e1a14 100%);
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .prompt-box .scene {
+    font-size: 13px;
+    color: var(--green-light);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .prompt-box .task {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--cream);
+    line-height: 1.5;
+  }
+
+  textarea {
+    width: 100%;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--cream);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15px;
+    padding: 14px;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+  textarea:focus { border-color: var(--gold); }
+  textarea::placeholder { color: #444; }
+
+  .btn {
+    display: inline-block;
+    padding: 11px 24px;
+    border-radius: 5px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-gold {
+    background: var(--gold);
+    color: #0d0d0d;
+  }
+  .btn-gold:hover { background: var(--gold-light); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+  }
+  .btn-outline:hover { background: var(--gold); color: #0d0d0d; }
+
+  .btn-small {
+    padding: 7px 14px;
+    font-size: 11px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    align-items: center;
+  }
+
+  /* FEEDBACK */
+  .feedback-box {
+    background: #0e1a14;
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    display: none;
+  }
+  .feedback-box.visible { display: block; }
+
+  .feedback-box .fb-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-light);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .feedback-box p {
+    font-size: 15px;
+    color: #bbb;
+    line-height: 1.7;
+  }
+
+  .loading-dots span {
+    display: inline-block;
+    animation: blink 1.2s infinite;
+    color: var(--gold);
+    font-size: 20px;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+
+  /* VOCAB */
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .vocab-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .vocab-card:hover { border-color: var(--gold); }
+
+  .vocab-card .word {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .vocab-card .part {
+    font-size: 11px;
+    color: var(--ash);
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .vocab-card .definition {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+
+  /* EXPANDER */
+  .steps-list {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+  }
+  .steps-list li {
+    counter-increment: step;
+    padding: 12px 16px 12px 48px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    color: #ccc;
+  }
+  .steps-list li:last-child { border-bottom: none; }
+  .steps-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: 24px;
+    height: 24px;
+    background: var(--gold);
+    color: #0d0d0d;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* EXAMPLE sentences */
+  .example-sentence {
+    background: #141414;
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 15px;
+    color: var(--cream);
+    margin: 8px 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+  }
+
+  .simple-sentence {
+    background: #1a1a1a;
+    border: 1px dashed #333;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    color: var(--ash);
+    margin: 8px 0;
+  }
+
+  /* PROGRESS NAV */
+  .progress-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .progress-info {
+    font-size: 12px;
+    color: var(--ash);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    background: var(--border);
+    border-radius: 99px;
+    height: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* SCORE */
+  .score-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold);
+    text-align: center;
+    margin: 12px 0;
+  }
+
+  .score-display span {
+    font-size: 14px;
+    color: var(--ash);
+    font-family: 'Source Sans 3', sans-serif;
+    display: block;
+    margin-top: 4px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 480px) {
+    .tab-btn { padding: 12px 14px; font-size: 10px; }
+    .panel { padding: 16px 14px; }
+    .vocab-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">ELA · 9th Grade · Sentence Expansion</div>
+  <h1>Sentence Builder<br><span>The Great Gatsby</span></h1>
+  <p class="subtitle">Turn simple ideas into powerful, elegant sentences</p>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('learn')">📖 How It Works</button>
+  <button class="tab-btn" onclick="showTab('vocab')">🔑 Key Vocab</button>
+  <button class="tab-btn" onclick="showTab('practice')">✍️ Practice</button>
+  <button class="tab-btn" onclick="showTab('challenge')">🔥 Challenge</button>
+</div>
+
+<!-- ===== TAB 1: HOW IT WORKS ===== -->
+<div id="tab-learn" class="panel active">
+  <div class="card">
+    <div class="card-label">Your Mission</div>
+    <p>Bad writers write <em>short</em>. Great writers write <em>specific</em>. Your job is to take a boring, flat sentence and expand it — adding details about <strong>who, what, where, when, why, and how</strong> — until it does real work.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">The 3-Level System</div>
+    <div style="margin-bottom:12px;">
+      <span class="level-badge level-1">Level 1 — Beginner</span>
+      <p style="font-size:14px; color:#999; margin-top:4px;">Add one detail. Make the sentence longer by answering ONE question (where? when? why?).</p>
+    </div>
+    <div style="margin-bottom:12px;">
+      <span class="level-badge level-2">Level 2 — Developing</span>
+      <p style="font-size:14px; color:#999; margin-top:4px;">Add two or more details. Use a comma, semicolon, or connecting word (although, because, while).</p>
+    </div>
+    <div>
+      <span class="level-badge level-3">Level 3 — Advanced</span>
+      <p style="font-size:14px; color:#999; margin-top:4px;">Build a complex sentence with vivid description, figurative language, or a contrast that reveals character or theme.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Watch It Happen</div>
+    <p style="font-size:13px; color:var(--ash); margin-bottom:8px;">Simple sentence:</p>
+    <div class="simple-sentence">Gatsby looked at the light.</div>
+    <p style="font-size:13px; color:var(--ash); margin: 10px 0 8px;">Level 1 — Added WHERE:</p>
+    <div class="example-sentence">Gatsby stood at the end of his dock and looked at the green light.</div>
+    <p style="font-size:13px; color:var(--ash); margin: 10px 0 8px;">Level 2 — Added WHY + EMOTION:</p>
+    <div class="example-sentence">Gatsby stood alone at the edge of his dock, reaching toward the green light across the bay, as if the distance between them might disappear if he wished hard enough.</div>
+    <p style="font-size:13px; color:var(--ash); margin: 10px 0 8px;">Level 3 — Theme + Figurative Language:</p>
+    <div class="example-sentence">Night after night, Gatsby stood at the trembling edge of his dock, arms outstretched toward Daisy's green light — not merely a beacon across the water, but the embodiment of every dream he had sacrificed his identity to possess.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">The Steps</div>
+    <ol class="steps-list">
+      <li>Read the simple sentence carefully.</li>
+      <li>Ask yourself: <em>Who? What? Where? When? Why? How?</em></li>
+      <li>Choose at least ONE detail from the story to add.</li>
+      <li>Use a connecting word or punctuation to attach it.</li>
+      <li>Read it out loud. Does it sound like real writing? If not, revise.</li>
+      <li>Submit and get feedback from your AI writing coach.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ===== TAB 2: VOCAB ===== -->
+<div id="tab-vocab" class="panel">
+  <div class="card">
+    <div class="card-label">Power Words from Chapters 1–2</div>
+    <p style="font-size:14px; color:var(--ash);">Click any word to copy it into your clipboard. Use these in your sentences.</p>
+  </div>
+
+  <div class="vocab-grid" id="vocabGrid"></div>
+
+  <div class="card">
+    <div class="card-label">Figurative Language to Steal</div>
+    <p style="font-size:14px; color:#aaa; margin-bottom:12px;">Fitzgerald uses these techniques. You should too.</p>
+
+    <div class="quote-block">
+      <p>"...a fantastic farm where ashes grow like wheat into ridges and hills and grotesque gardens."</p>
+    </div>
+    <p style="font-size:13px; color:var(--ash); margin-bottom:14px;"><strong style="color:var(--gold);">Simile</strong> — comparing two unlike things using "like" or "as." The Valley of Ashes is like a farm — but instead of life, it grows waste.</p>
+
+    <div class="quote-block">
+      <p>The eyes of Doctor T.J. Eckleburg — enormous, unblinking — watch over a world they cannot save.</p>
+    </div>
+    <p style="font-size:13px; color:var(--ash); margin-bottom:14px;"><strong style="color:var(--gold);">Symbol</strong> — an object that represents a larger idea. Eckleburg's eyes = a forgotten God watching a corrupt world.</p>
+
+    <div class="quote-block">
+      <p>The green light burns at the end of Daisy's dock — small, distant, unreachable.</p>
+    </div>
+    <p style="font-size:13px; color:var(--ash);"><strong style="color:var(--gold);">Symbol + Contrast</strong> — the light is tiny but carries enormous emotional weight. Size vs. meaning.</p>
+  </div>
+</div>
+
+<!-- ===== TAB 3: PRACTICE ===== -->
+<div id="tab-practice" class="panel">
+  <div class="progress-nav">
+    <span class="progress-info" id="practiceCounter">Exercise 1 of 5</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="practiceBar" style="width:20%"></div>
+    </div>
+  </div>
+
+  <div id="practiceContent"></div>
+</div>
+
+<!-- ===== TAB 4: CHALLENGE ===== -->
+<div id="tab-challenge" class="panel">
+  <div class="card">
+    <div class="card-label">🔥 Advanced Challenge</div>
+    <p>You will write a <strong>3-sentence paragraph</strong> expanding a single scene from the novel. Your paragraph must include: (1) a vivid setting detail, (2) a character's emotion or motive, and (3) a connection to a theme — class, the American Dream, or appearance vs. reality.</p>
+  </div>
+
+  <div id="challengeContent"></div>
+</div>
+
+<script>
+// ============================================================
+//  DATA
+// ============================================================
+const VOCAB = [
+  { word: "arrogance", part: "noun", def: "an attitude of superiority; behaving as if you're better than others" },
+  { word: "desolate", part: "adjective", def: "empty, bleak, and without hope or joy" },
+  { word: "extravagant", part: "adjective", def: "spending or done in excess; showy and wasteful" },
+  { word: "melancholy", part: "noun/adj", def: "a deep, quiet sadness that lingers" },
+  { word: "corrupt", part: "adjective", def: "dishonest and willing to act immorally for personal gain" },
+  { word: "illusion", part: "noun", def: "a false belief or image mistaken for reality" },
+  { word: "opulent", part: "adjective", def: "extremely rich and luxurious in appearance" },
+  { word: "yearning", part: "noun/verb", def: "a deep, intense longing for something out of reach" },
+  { word: "insulate", part: "verb", def: "to protect someone from unpleasant realities" },
+  { word: "grotesque", part: "adjective", def: "comically or repulsively ugly or distorted" },
+  { word: "mobility", part: "noun", def: "the ability to move between social classes" },
+  { word: "spectral", part: "adjective", def: "ghostlike; pale and eerie" },
+];
+
+const PRACTICE_EXERCISES = [
+  {
+    level: 1,
+    scene: "Chapter 1 — Nick Arrives in West Egg",
+    simple: "Nick moved to Long Island.",
+    hint: "Add WHERE he moved and WHY he went there.",
+    model: "Nick moved to the modest neighborhood of West Egg on Long Island, eager to find his fortune in the bond business and escape the ordinary life he had always known.",
+    theme: "American Dream"
+  },
+  {
+    level: 1,
+    scene: "Chapter 1 — Tom Buchanan",
+    simple: "Tom was a powerful man.",
+    hint: "Add HOW his power showed — in his body, his money, or the way he treated people.",
+    model: "Tom Buchanan was a man whose physical power — broad shoulders, a hard jaw, and the practiced arrogance of someone who had never been told no — filled every room he entered.",
+    theme: "Class & Power"
+  },
+  {
+    level: 2,
+    scene: "Chapter 1 — The Green Light",
+    simple: "Gatsby looked at the light.",
+    hint: "Add WHERE the light was, HOW Gatsby reached for it, and WHAT it might mean to him.",
+    model: "Gatsby stood alone at the trembling edge of his dock, arms stretched toward the small green light burning at the far end of Daisy's pier, as though sheer desire might close the distance between them.",
+    theme: "Longing & the Dream"
+  },
+  {
+    level: 2,
+    scene: "Chapter 2 — The Valley of Ashes",
+    simple: "The Valley of Ashes was a sad place.",
+    hint: "Describe WHAT it looked like and WHO lived there. Use a comparison (like / as).",
+    model: "The Valley of Ashes stretched between West Egg and the city like a landscape from a nightmare — grey hills of industrial waste, grey men moving through grey air — a world that the wealthy drove past without ever truly seeing.",
+    theme: "Class Division"
+  },
+  {
+    level: 3,
+    scene: "Chapter 2 — Myrtle Wilson",
+    simple: "Myrtle wanted a better life.",
+    hint: "Explain WHY, show HOW she tried, and connect her to a theme — what does her desire reveal about the American Dream?",
+    model: "Myrtle Wilson burned with a longing so fierce it had become its own kind of violence against the grey world she was born into; in Tom Buchanan she saw not a man but an escape route, a door marked 'somewhere else,' and she clung to the illusion of his attention the way the drowning cling to wreckage — knowing it cannot save them, but unable to let go.",
+    theme: "American Dream & Class"
+  }
+];
+
+const CHALLENGE_PROMPTS = [
+  {
+    scene: "Gatsby's Party",
+    task: "Write 3 sentences expanding this moment: Gatsby watches his guests from a distance. Include a vivid setting detail, Gatsby's internal feeling, and a connection to the theme of appearance vs. reality.",
+  },
+  {
+    scene: "Tom Strikes Myrtle",
+    task: "Write 3 sentences expanding this moment: Tom hits Myrtle at the apartment party. Include the atmosphere of the room, Tom's motive or attitude, and what this tells us about class and power.",
+  },
+  {
+    scene: "East Egg vs. West Egg",
+    task: "Write 3 sentences that contrast East Egg and West Egg. Use specific details from the novel, describe what each place looks and feels like, and connect the contrast to the American Dream.",
+  }
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+let practiceIndex = 0;
+let practiceResponses = [];
+let challengePromptIndex = Math.floor(Math.random() * CHALLENGE_PROMPTS.length);
+
+// ============================================================
+//  TABS
+// ============================================================
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+//  VOCAB
+// ============================================================
+function renderVocab() {
+  const grid = document.getElementById('vocabGrid');
+  grid.innerHTML = VOCAB.map(v => `
+    <div class="vocab-card" onclick="copyWord('${v.word}', this)" title="Click to copy">
+      <div class="word">${v.word}</div>
+      <div class="part">${v.part}</div>
+      <div class="definition">${v.def}</div>
+    </div>
+  `).join('');
+}
+
+function copyWord(word, el) {
+  navigator.clipboard.writeText(word).catch(() => {});
+  const orig = el.querySelector('.word').textContent;
+  el.querySelector('.word').textContent = '✓ Copied!';
+  setTimeout(() => el.querySelector('.word').textContent = orig, 1200);
+}
+
+// ============================================================
+//  PRACTICE
+// ============================================================
+function renderPractice() {
+  const ex = PRACTICE_EXERCISES[practiceIndex];
+  const levelNum = ex.level;
+  const levelLabel = ['', 'Beginner', 'Developing', 'Advanced'][levelNum];
+  const levelClass = `level-${levelNum}`;
+
+  document.getElementById('practiceCounter').textContent = `Exercise ${practiceIndex + 1} of ${PRACTICE_EXERCISES.length}`;
+  document.getElementById('practiceBar').style.width = `${((practiceIndex + 1) / PRACTICE_EXERCISES.length) * 100}%`;
+
+  document.getElementById('practiceContent').innerHTML = `
+    <span class="level-badge ${levelClass}">Level ${levelNum} — ${levelLabel}</span>
+
+    <div class="prompt-box">
+      <div class="scene">📍 ${ex.scene} · Theme: ${ex.theme}</div>
+      <div class="task">Expand this sentence:</div>
+    </div>
+
+    <div class="simple-sentence" style="margin-bottom:16px; font-size:17px;">${ex.simple}</div>
+
+    <div class="card">
+      <div class="card-label">💡 Your Hint</div>
+      <p>${ex.hint}</p>
+    </div>
+
+    <textarea id="practiceInput" placeholder="Write your expanded sentence here..."></textarea>
+
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="submitPractice()">Get Feedback ✦</button>
+      <button class="btn btn-outline btn-small" onclick="showModel()">Show Model Answer</button>
+      ${practiceIndex > 0 ? `<button class="btn btn-outline btn-small" onclick="prevPractice()">← Back</button>` : ''}
+    </div>
+
+    <div id="practiceFeedback" class="feedback-box"></div>
+    <div id="practiceModel" style="display:none; margin-top:16px;">
+      <div class="card">
+        <div class="card-label">Model Answer</div>
+        <div class="example-sentence">${ex.model}</div>
+        <p style="font-size:13px; color:var(--ash); margin-top:10px;">Notice: specific details, a connecting word, and a tie to theme. Your answer doesn't have to match — it just needs to do the same <em>work</em>.</p>
+      </div>
+    </div>
+  `;
+}
+
+async function submitPractice() {
+  const input = document.getElementById('practiceInput').value.trim();
+  const feedbackBox = document.getElementById('practiceFeedback');
+
+  if (!input || input.length < 10) {
+    feedbackBox.innerHTML = `<div class="fb-label">Hold On</div><p>You need to actually write something. Try again.</p>`;
+    feedbackBox.classList.add('visible');
+    return;
+  }
+
+  const ex = PRACTICE_EXERCISES[practiceIndex];
+
+  feedbackBox.innerHTML = `<div class="fb-label">Analyzing your sentence...</div><p><span class="loading-dots"><span>•</span><span>•</span><span>•</span></span></p>`;
+  feedbackBox.classList.add('visible');
+
+  const systemPrompt = `You are a blunt but fair 9th-grade ELA teacher who is an expert on The Great Gatsby. 
+Your job is to give short, honest feedback on student sentence-expansion exercises.
+Be direct. Do not be overly encouraging. Point out what works and what is weak.
+Keep your response under 120 words. Write at a 9th-grade reading level.
+Structure: 1) What works (1-2 sentences). 2) What to fix or push further (1-2 sentences). 3) One specific revision tip.`;
+
+  const userMsg = `The student was asked to expand this simple sentence from The Great Gatsby context:
+ORIGINAL: "${ex.simple}"
+HINT GIVEN: "${ex.hint}"
+THEME: "${ex.theme}"
+SCENE: "${ex.scene}"
+STUDENT'S SENTENCE: "${input}"
+Give honest, specific feedback.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || "Could not get feedback. Try again.";
+
+    feedbackBox.innerHTML = `
+      <div class="fb-label">✦ Teacher Feedback</div>
+      <p>${text.replace(/\n/g, '<br>')}</p>
+      ${practiceIndex < PRACTICE_EXERCISES.length - 1
+        ? `<div class="btn-row" style="margin-top:12px;"><button class="btn btn-gold btn-small" onclick="nextPractice()">Next Exercise →</button></div>`
+        : `<div class="btn-row" style="margin-top:12px;"><p style="color:var(--gold); font-family:'Playfair Display',serif; font-style:italic;">All exercises complete. Try the Challenge tab.</p></div>`
+      }
+    `;
+  } catch (e) {
+    feedbackBox.innerHTML = `<div class="fb-label">Error</div><p>Could not reach the AI. Check your connection and try again.</p>`;
+  }
+}
+
+function showModel() {
+  const m = document.getElementById('practiceModel');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+function nextPractice() {
+  if (practiceIndex < PRACTICE_EXERCISES.length - 1) {
+    practiceIndex++;
+    renderPractice();
+  }
+}
+
+function prevPractice() {
+  if (practiceIndex > 0) {
+    practiceIndex--;
+    renderPractice();
+  }
+}
+
+// ============================================================
+//  CHALLENGE
+// ============================================================
+function renderChallenge() {
+  const ch = CHALLENGE_PROMPTS[challengePromptIndex];
+
+  document.getElementById('challengeContent').innerHTML = `
+    <div class="prompt-box">
+      <div class="scene">📍 Scene: ${ch.scene}</div>
+      <div class="task">${ch.task}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Requirements</div>
+      <ul>
+        <li>Exactly <strong>3 sentences</strong></li>
+        <li>At least <strong>one figurative device</strong> (simile, metaphor, or symbol reference)</li>
+        <li>At least <strong>one vocabulary word</strong> from the Key Vocab tab</li>
+        <li>Clear connection to a <strong>theme</strong>: class, the American Dream, or appearance vs. reality</li>
+      </ul>
+    </div>
+
+    <textarea id="challengeInput" placeholder="Write your 3-sentence paragraph here..." style="min-height:140px;"></textarea>
+
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="submitChallenge()">Submit for Feedback ✦</button>
+      <button class="btn btn-outline btn-small" onclick="newChallenge()">Different Prompt ↺</button>
+    </div>
+
+    <div id="challengeFeedback" class="feedback-box"></div>
+  `;
+}
+
+async function submitChallenge() {
+  const input = document.getElementById('challengeInput').value.trim();
+  const feedbackBox = document.getElementById('challengeFeedback');
+  const ch = CHALLENGE_PROMPTS[challengePromptIndex];
+
+  if (!input || input.length < 30) {
+    feedbackBox.innerHTML = `<div class="fb-label">Not Enough</div><p>Write at least 3 complete sentences before submitting.</p>`;
+    feedbackBox.classList.add('visible');
+    return;
+  }
+
+  feedbackBox.innerHTML = `<div class="fb-label">Reading your paragraph...</div><p><span class="loading-dots"><span>•</span><span>•</span><span>•</span></span></p>`;
+  feedbackBox.classList.add('visible');
+
+  const systemPrompt = `You are a blunt, expert 9th-grade ELA teacher grading a paragraph expansion exercise on The Great Gatsby.
+Be honest and direct. Give credit when earned. Call out weak writing. 
+Write at a 9th-grade level. Keep response under 160 words.
+Grade the paragraph on: (1) Sentence expansion quality, (2) Figurative language use, (3) Vocabulary sophistication, (4) Thematic connection.
+Give a score out of 12 (3 per category). Be specific.`;
+
+  const userMsg = `Challenge scene: "${ch.scene}"
+Task: "${ch.task}"
+STUDENT PARAGRAPH:
+"${input}"
+Grade it.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || "Could not get feedback.";
+
+    feedbackBox.innerHTML = `
+      <div class="fb-label">✦ Challenge Feedback</div>
+      <p>${text.replace(/\n/g, '<br>')}</p>
+    `;
+  } catch (e) {
+    feedbackBox.innerHTML = `<div class="fb-label">Error</div><p>Could not reach the AI. Try again.</p>`;
+  }
+}
+
+function newChallenge() {
+  challengePromptIndex = (challengePromptIndex + 1) % CHALLENGE_PROMPTS.length;
+  renderChallenge();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+renderVocab();
+renderPractice();
+renderChallenge();
+</script>
+</body>
+</html>
